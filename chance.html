@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why not? Take a Chance With Me</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden; /* Prevents scrollbars when button moves */
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    width: 350px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    z-index: 1;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+    position: relative; 
+    height: 50px; /* Reserved space for buttons */
+}
+
+button {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: transform 0.2s;
+}
+
+#yesBtn { 
+    background: #4CAF50; 
+    color: white;
+}
+
+#noBtn {
+    background: #f44336;
+    color: white;
+    /* transition: left 0.1s ease, top 0.1s ease; Add this for a 'sliding' dodge effect */
+}
+
+.lyrics {
+    position: absolute;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.8s;
+    pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card" id="card">
+    <h1>WHY NOT</h1>
+    <h1>TAKE A CHANCE WITH ME?</h1>
+    <div class="btn-container">
+        <button id="yesBtn">Yes</button>
+        <button id="noBtn">No</button>
+    </div>
+</div>
+
+<div id="lyrics" class="lyrics"></div>
+
+<audio id="bgMusic" src="media/Download.mp4"></audio>
+
+<script>
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const card = document.getElementById("card");
+    const music = document.getElementById("bgMusic");
+    const lyricsDiv = document.getElementById("lyrics");
+
+    // 1. Define 6 specific "near-card" positions (Relative to the center)
+    // These are X and Y offsets from the original button position
+    const positions = [
+        { x: 40, y: -30 },  // Top Right
+        { x: -40, y: 30 },  // Bottom Left
+        { x: 50, y: 20 },   // Mid Right
+        { x: -50, y: -20 }, // Mid Left
+        { x: 0, y: -60 },   // Directly Above
+        { x: 0, y: 60 }     // Directly Below
+    ];
+
+    let lastIndex = -1;
+
+    const loopDodge = () => {
+        // Ensure it can move freely
+        if (noBtn.style.position !== "absolute") {
+            noBtn.style.position = "absolute";
+        }
+
+        // 2. Pick a random index from our 6 positions (that isn't the same as the last one)
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * positions.length);
+        } while (newIndex === lastIndex);
+        
+        lastIndex = newIndex;
+        const pos = positions[newIndex];
+
+        // 3. Apply the transform (This moves it relative to its starting spot in the card)
+        // Using 'translate' is much smoother and ignores page zoom issues
+        noBtn.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+        noBtn.style.transition = "transform 0.1s ease-out"; 
+    };
+
+    // Trigger on hover
+    noBtn.addEventListener("mouseenter", loopDodge);
+
+    // --- Lyrics Logic (Same as before) ---
+    const lyricsData = [
+        { text: "Oh, why can't we for once", start: 0, end: 4 },
+        { text: "Say what we want, say what we feel?", start: 4, end: 10 },
+        { text: "Oh, why can't you for once", start: 10, end: 14 },
+        { text: "Disregard the world, and run to what you know is real?", start: 14, end: 19 },
+        { text: "Take a chance with me :)", start: 19, end: 999 }
+    ];
+
+    let currentIndex = -1;
+
+    yesBtn.addEventListener("click", () => {
+        card.style.display = "none";
+        noBtn.style.display = "none"; 
+        music.currentTime = 0;
+        music.play().catch(e => console.log("Music play blocked: ", e));
+        
+        setInterval(() => {
+            const currentTime = music.currentTime;
+            const line = lyricsData.find(l => currentTime >= l.start && currentTime < l.end);
+            
+            if (line && lyricsData.indexOf(line) !== currentIndex) {
+                currentIndex = lyricsData.indexOf(line);
+                lyricsDiv.style.opacity = 0;
+                setTimeout(() => {
+                    lyricsDiv.textContent = line.text;
+                    lyricsDiv.style.opacity = 1;
+                }, 200);
+            }
+        }, 100);
+    });
+    // Trigger on hover (for PC)
+noBtn.addEventListener("mouseenter", loopDodge);
+
+// Trigger on touch (for Phones)
+noBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // Prevents the actual click from happening
+    loopDodge();
+});
+</script>
+
+</body>
+</html>

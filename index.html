@@ -172,6 +172,31 @@ noBtn.addEventListener("touchstart", (e) => {
     e.preventDefault(); // Prevents the actual click from happening
     loopDodge();
 });
+    setInterval(() => {
+    const currentTime = music.currentTime;
+    const line = lyricsData.find(l => currentTime >= l.start && currentTime < l.end);
+    
+    if (line && lyricsData.indexOf(line) !== currentIndex) {
+        currentIndex = lyricsData.indexOf(line);
+        lyricsDiv.style.opacity = 0;
+
+        setTimeout(() => {
+            lyricsDiv.textContent = line.text;
+
+            // Set background image
+            lyricsDiv.style.backgroundImage = `url('${line.bg}')`;
+            lyricsDiv.style.backgroundSize = "cover";
+            lyricsDiv.style.backgroundPosition = "center";
+            lyricsDiv.style.backgroundRepeat = "no-repeat";
+
+            // Optional: add some padding and rounded corners
+            lyricsDiv.style.padding = "20px";
+            lyricsDiv.style.borderRadius = "15px";
+
+            lyricsDiv.style.opacity = 1;
+        }, 200);
+    }
+}, 100);
 </script>
 
 </body>

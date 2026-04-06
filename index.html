@@ -3,41 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Why not? Take a Chance With Me</title>
 
 <style>
+/* --- Full screen body with background transition --- */
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     width: 100vw;
-    overflow: hidden; /* Prevent scrollbars */
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    transition: background-image 0.5s ease-in-out; /* Smooth fade between images */
+    transition: background-image 0.5s ease-in-out;
 }
 
-.lyrics {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 36px;
-    font-weight: bold;
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.8s;
-    pointer-events: none;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
-}
-
+/* --- Card in the center --- */
 .card {
     background: rgba(255, 255, 255, 0.1);
     padding: 40px;
@@ -49,6 +36,7 @@ body {
     z-index: 1;
 }
 
+/* --- Button container --- */
 .btn-container {
     display: flex;
     justify-content: center;
@@ -77,17 +65,21 @@ button {
 #noBtn {
     background: #f44336;
     color: white;
-    /* transition: left 0.1s ease, top 0.1s ease; Add this for a 'sliding' dodge effect */
 }
 
+/* --- Lyrics centered and styled --- */
 .lyrics {
     position: absolute;
-    font-size: 28px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
     font-weight: bold;
     text-align: center;
     opacity: 0;
     transition: opacity 0.8s;
     pointer-events: none;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
 }
 </style>
 </head>
@@ -106,109 +98,79 @@ button {
 <div id="lyrics" class="lyrics"></div>
 
 <audio id="bgMusic" src="download.mp4"></audio>
-    
+
 <script>
-    const noBtn = document.getElementById("noBtn");
-    const yesBtn = document.getElementById("yesBtn");
-    const card = document.getElementById("card");
-    const music = document.getElementById("bgMusic");
-    const lyricsDiv = document.getElementById("lyrics");
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const card = document.getElementById("card");
+const music = document.getElementById("bgMusic");
+const lyricsDiv = document.getElementById("lyrics");
 
-    // 1. Define 6 specific "near-card" positions (Relative to the center)
-    // These are X and Y offsets from the original button position
-    const positions = [
-        { x: 40, y: -30 },  // Top Right
-        { x: -40, y: 30 },  // Bottom Left
-        { x: 50, y: 20 },   // Mid Right
-        { x: -50, y: -20 }, // Mid Left
-        { x: 0, y: -60 },   // Directly Above
-        { x: 0, y: 60 }     // Directly Below
-    ];
+// --- Dodge button positions ---
+const positions = [
+    { x: 40, y: -30 },  
+    { x: -40, y: 30 },  
+    { x: 50, y: 20 },   
+    { x: -50, y: -20 }, 
+    { x: 0, y: -60 },   
+    { x: 0, y: 60 }     
+];
+let lastIndex = -1;
 
-    let lastIndex = -1;
+const loopDodge = () => {
+    if (noBtn.style.position !== "absolute") {
+        noBtn.style.position = "absolute";
+    }
+    let newIndex;
+    do {
+        newIndex = Math.floor(Math.random() * positions.length);
+    } while (newIndex === lastIndex);
+    
+    lastIndex = newIndex;
+    const pos = positions[newIndex];
+    noBtn.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+    noBtn.style.transition = "transform 0.1s ease-out"; 
+};
 
-    const loopDodge = () => {
-        // Ensure it can move freely
-        if (noBtn.style.position !== "absolute") {
-            noBtn.style.position = "absolute";
-        }
-
-        // 2. Pick a random index from our 6 positions (that isn't the same as the last one)
-        let newIndex;
-        do {
-            newIndex = Math.floor(Math.random() * positions.length);
-        } while (newIndex === lastIndex);
-        
-        lastIndex = newIndex;
-        const pos = positions[newIndex];
-
-        // 3. Apply the transform (This moves it relative to its starting spot in the card)
-        // Using 'translate' is much smoother and ignores page zoom issues
-        noBtn.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
-        noBtn.style.transition = "transform 0.1s ease-out"; 
-    };
-
-    // Trigger on hover
-    noBtn.addEventListener("mouseenter", loopDodge);
-
-    // --- Lyrics Logic (Same as before) ---
-    const lyricsData = [
-        { text: "Oh, why can't we for once", start: 0, end: 4, bg: "cutecat.jpeg" },
-        { text: "Say what we want, say what we feel?", start: 4, end: 10, bg: "cutecat.jpeg" },
-        { text: "Oh, why can't you for once", start: 10, end: 14, bg: "cutecat.jpg" },
-        { text: "Disregard the world, and run to what you know is real?", start: 14, end: 19, bg: "cutecat.jpeg"},
-        { text: "Take a chance with me :)", start: 19, end: 999, bg: "cutecat.jpeg" }
-    ];
-
-    let currentIndex = -1;
-
-    yesBtn.addEventListener("click", () => {
-        card.style.display = "none";
-        noBtn.style.display = "none"; 
-        music.currentTime = 0;
-        music.play().catch(e => console.log("Music play blocked: ", e));
-        
-        setInterval(() => {
-            const currentTime = music.currentTime;
-            const line = lyricsData.find(l => currentTime >= l.start && currentTime < l.end);
-            
-            if (line && lyricsData.indexOf(line) !== currentIndex) {
-                currentIndex = lyricsData.indexOf(line);
-                lyricsDiv.style.opacity = 0;
-                setTimeout(() => {
-                    lyricsDiv.textContent = line.text;
-                    lyricsDiv.style.opacity = 1;
-                }, 200);
-            }
-        }, 100);
-    });
-    // Trigger on hover (for PC)
+// --- Trigger dodge ---
 noBtn.addEventListener("mouseenter", loopDodge);
-
-// Trigger on touch (for Phones)
 noBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // Prevents the actual click from happening
+    e.preventDefault();
     loopDodge();
 });
+
+// --- Lyrics and background ---
+const lyricsData = [
+    { text: "Oh, why can't we for once", start: 0, end: 4, bg: "cutecat.jpeg" },
+    { text: "Say what we want, say what we feel?", start: 4, end: 10, bg: "cutecat.jpeg" },
+    { text: "Oh, why can't you for once", start: 10, end: 14, bg: "cutecat.jpg" },
+    { text: "Disregard the world, and run to what you know is real?", start: 14, end: 19, bg: "cutecat.jpeg" },
+    { text: "Take a chance with me :)", start: 19, end: 999, bg: "cutecat.jpeg" }
+];
+let currentIndex = -1;
+
+yesBtn.addEventListener("click", () => {
+    card.style.display = "none";
+    noBtn.style.display = "none"; 
+    music.currentTime = 0;
+    music.play().catch(e => console.log("Music play blocked: ", e));
+
     setInterval(() => {
-setInterval(() => {
-    const currentTime = music.currentTime;
-    const line = lyricsData.find(l => currentTime >= l.start && currentTime < l.end);
-    
-    if (line && lyricsData.indexOf(line) !== currentIndex) {
-        currentIndex = lyricsData.indexOf(line);
-        lyricsDiv.style.opacity = 0;
+        const currentTime = music.currentTime;
+        const line = lyricsData.find(l => currentTime >= l.start && currentTime < l.end);
 
-        setTimeout(() => {
-            lyricsDiv.textContent = line.text;
+        if (line && lyricsData.indexOf(line) !== currentIndex) {
+            currentIndex = lyricsData.indexOf(line);
+            lyricsDiv.style.opacity = 0;
 
-            // Set the BODY background for full screen
-            document.body.style.backgroundImage = `url('${line.bg}')`;
-
-            lyricsDiv.style.opacity = 1;
-        }, 200);
-    }
-}, 100);
+            setTimeout(() => {
+                lyricsDiv.textContent = line.text;
+                document.body.style.backgroundImage = `url('${line.bg}')`; // Fullscreen bg
+                lyricsDiv.style.opacity = 1;
+            }, 200);
+        }
+    }, 100);
+});
 </script>
 
 </body>

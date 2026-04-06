@@ -17,7 +17,25 @@ body {
     align-items: center;
     height: 100vh;
     width: 100vw;
-    overflow: hidden; /* Prevents scrollbars when button moves */
+    overflow: hidden; /* Prevent scrollbars */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 0.5s ease-in-out; /* Smooth fade between images */
+}
+
+.lyrics {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.8s;
+    pointer-events: none;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
 }
 
 .card {
@@ -173,6 +191,7 @@ noBtn.addEventListener("touchstart", (e) => {
     loopDodge();
 });
     setInterval(() => {
+setInterval(() => {
     const currentTime = music.currentTime;
     const line = lyricsData.find(l => currentTime >= l.start && currentTime < l.end);
     
@@ -183,15 +202,8 @@ noBtn.addEventListener("touchstart", (e) => {
         setTimeout(() => {
             lyricsDiv.textContent = line.text;
 
-            // Set background image
-            lyricsDiv.style.backgroundImage = `url('${line.bg}')`;
-            lyricsDiv.style.backgroundSize = "cover";
-            lyricsDiv.style.backgroundPosition = "center";
-            lyricsDiv.style.backgroundRepeat = "no-repeat";
-
-            // Optional: add some padding and rounded corners
-            lyricsDiv.style.padding = "20px";
-            lyricsDiv.style.borderRadius = "15px";
+            // Set the BODY background for full screen
+            document.body.style.backgroundImage = `url('${line.bg}')`;
 
             lyricsDiv.style.opacity = 1;
         }, 200);
